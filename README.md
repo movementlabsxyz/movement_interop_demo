@@ -20,7 +20,7 @@ The application includes several key functions:
 - `vote(safeAddress, multiAccount)`: Votes on a Safe contract.
 - `checkSafeContractVoted(safeAddress, multiAccount)`: Checks if a Safe contract has voted.
 - `submitTx(rawTxn)`: Submits a transaction.
-- `fix(multiAccount)`: Fixes the multiAccount address.
+- `zeroPad(multiAccount)`: Fixes the multiAccount address if size is distinct from AptosMove address size.
 
 ## Running the Application
 
@@ -28,9 +28,9 @@ The main function `run()` orchestrates the operations. It first deploys a new Sa
 
 ```javascript
 async function run() {
-  let safeAddress = await deploySafe()
-  let multiAccount = fix(await setupMoveMultisigAccount(safeAddress))
-  await vote(safeAddress, multiAccount)
+  let safeAddress = await deploySafe();
+  let multiAccount = fix(await setupMoveMultisigAccount(safeAddress));
+  await vote(safeAddress, multiAccount);
 }
 ```
 
@@ -41,10 +41,10 @@ The application is run by calling `run().then()`.
 The application uses several environment variables, which should be set in a `.env` file in the project root:
 
 - `APTOS_RPC_ENDPOINT`: The RPC endpoint for the Aptos client.
-- `MOVE_OWNER_PK`: The private key of the Move owner.
+- `MOVE_PRIVATE_KEY`: The private key of the Move owner.
 - `MOVE_MULTISIG_OTHER_OWNER_ADDR`: The address of the other owner of the Move multisig account.
 - `EVM_RPC_ENDPOINT`: The RPC endpoint for the EVM.
-- `EVM_OWNER_PK`: The private key of the EVM owner.
+- `ETHEREUM_PRIVATE_KEY`: The private key of the EVM owner.
 - `SAFE_SERVICE_API`: The API endpoint for the Safe service.
 - `EVM_PRECOMPILE_CONTRACT`: The address of the EVM precompile contract.
 - `MOVE_FRAMEWORK`: The address of the Move framework.
@@ -61,8 +61,8 @@ The application uses several environment variables, which should be set in a `.e
 
 ## Steps for `move-to-evm.js`
 
-1. Create a Counter.sol contract using the EVM wallet.
-2. Call the setNumber function of the Counter contract using the Move wallet.
+1. Create a NumberRegistry.sol contract using the EVM wallet.
+2. Call the setNumber function of the NumberRegistry contract using the Move wallet.
 3. Check whether the number is set successfully.
 
 ## Note
