@@ -8,11 +8,15 @@ const client = new AptosClient(process.env.MOVEMENT_RPC_ENDPOINT);
 let pk = process.env.MOVE_PRIVATE_KEY;
 let owner = new AptosAccount(new HexString(pk).toUint8Array())
 
+const fs = require("fs");
+const path = require("path");
+
 const web3Provider = process.env.EVM_RPC_ENDPOINT
 const provider = getDefaultProvider(web3Provider)
 const wallet = new ethers.Wallet(process.env.ETHEREUM_PRIVATE_KEY, provider);
 const account = wallet.connect(provider);
 const data = require("./NumberRegistry.json")
+const moveModule = "./move-contract";
 
 async function deployNumberRegistry() {
 	const factory = new ContractFactory(data.abi, data.bytecode, account);
@@ -20,6 +24,15 @@ async function deployNumberRegistry() {
 	console.log(`NumberRegistry deployed at ${contract.address}`)
 
 	return contract
+}
+
+async function deployMovePackage() {
+	const moduleData = fs.readFileSync(path.join(moveModule, "build", "CallEVMDemo", "bytecode_modules", "demo.mv"));
+	const packageMetadata = fs.readFileSync(path.join(moveModule, "build", "CallEVMDemo", "package-metadata.bcs"));
+	let txnHash = await client.publishPackage(owner, new HexString(packageMetadata.toString("hex")).toUint8Array(), [
+		new TxnBuilderTypes.Module(new HexString(moduleData.toString("hex")).toUint8Array()),
+	]);
+	await client.waitForTransaction(txnHash, { checkSuccess: true });
 }
 
 // Function to submit a transaction
@@ -42,8 +55,24 @@ async function getNonce(addr) {
 	}
 }
 
+async function setNumberByMoveContract(contract) {
+	let interface = new ethers.utils.Interface(data.abi);
+
+	// 1. Encodes the EVM function
+	let calldata = interface.encodeFunctionData("setNumber", [200]);
+
+	// 2. Generates the AptosVM transaction that interacts with the EVM contract
+	let txn = await client.generateTransaction(owner.address(), {
+		function: `${owner.address()}::demo::call_evm`,
+		type_arguments: [],
+		arguments: [new HexString(contract.address).toUint8Array(), new HexString(calldata).toUint8Array(), BCS.bcsSerializeU256(0)],
+	});
+
+	console.log(`setting number tx ${await submitTx(txn)}`);
+}
+
 // Function to set the number
-async function setNumber(contract) {
+async function setNumberByWallet(contract) {
 	let interface = new ethers.utils.Interface(data.abi);
 	
 	// 1. Encodes the EVM function
@@ -63,13 +92,18 @@ async function setNumber(contract) {
 }
 
 async function run() {
-	await getNonce(owner.address())
 	let contract = await deployNumberRegistry();
 	let number = await contract.number();
 	console.log(`number before setting ${number}`)
-	await setNumber(contract)
+	await setNumberByWallet(contract)
 	number = await contract.number();
-	console.log(`number after setting ${number}`)
+	console.log(`number after setting by wallet ${number}`)
+
+	await deployMovePackage(); // only need to deploy once
+	await setNumberByMoveContract(contract);
+	number = await contract.number();
+	console.log(`number after setting by contract ${number}`)
+
 }
 
 run().then()

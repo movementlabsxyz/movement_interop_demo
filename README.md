@@ -49,7 +49,7 @@ The application uses several environment variables, which should be set in a `.e
 - `EVM_PRECOMPILE_CONTRACT`: The address of the EVM precompile contract.
 - `MOVE_FRAMEWORK`: The address of the Move framework.
 
-## Steps for `evm-to-move.js`
+## Steps for `mevm-to-aptosvm.js`
 
 1. Create a Gnosis Safe contract using the EVM wallet.
 2. Create a multisig account using the Move wallet, and set the Gnosis Safe contract created in step 1 as one of the owners.
@@ -59,10 +59,10 @@ The application uses several environment variables, which should be set in a `.e
 6. Execute the transaction created in step 4 using the EVM wallet.
 7. Check whether the multisig account has voted successfully.
 
-## Steps for `move-to-evm.js`
+## Steps for `aptosvm-to-mevm.js`
 
 1. Create a NumberRegistry.sol contract using the EVM wallet.
-2. Call the setNumber function of the NumberRegistry contract using the Move wallet.
+2. Call the setNumber function of the NumberRegistry contract using the Move wallet or using the Move Contract(you must compile the and publish the move package as the demo contract in move-contract).
 3. Check whether the number is set successfully.
 
 ## Note

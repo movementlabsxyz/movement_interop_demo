@@ -1,0 +1,27 @@
+[package]
+name = "CallEVMDemo"
+version = "1.0.0"
+
+
+[addresses]
+call_evm_demo = "_"
+
+#[dependencies.AptosFramework]
+#git = 'https://github.com/aptos-labs/aptos-core'
+#rev = 'devnet'
+#subdir = 'aptos-move/framework/aptos-framework'
+#
+#[dependencies.AptosStdlib]
+#git = 'https://github.com/aptos-labs/aptos-core'
+#rev = 'devnet'
+#subdir = 'aptos-move/framework/aptos-stdlib'
+
+[dependencies.AptosFramework]
+git = 'https://github.com/shaokun11/move-me2'
+rev = 'acc184f9af236ac318b8235ea61fc6669a8a3b79'
+subdir = 'aptos-move/framework/aptos-framework'
+#
+#[dependencies.AptosStdlib]
+#git = 'https://github.com/shaokun11/move-me2'
+#rev = 'acf53c7de6982aee4747b1ff47908326da52487c'
+#subdir = 'aptos-move/framework/aptos-stdlib'
